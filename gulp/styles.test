@@ -3,8 +3,12 @@
 var path = require('path');
 var gulp = require('gulp');
 var conf = require('./conf');
+
+//custom additions
+// var poststylus = require('poststylus');
+var postcss = require('postcss');
+// var autoprefixer = require('autoprefixer');
 var rupture = require('rupture');
-var lost = require('lost');
 
 
 var browserSync = require('browser-sync');
@@ -38,9 +42,14 @@ gulp.task('styles', function () {
     .pipe($.inject(injectFiles, injectOptions))
     .pipe(wiredep(_.extend({}, conf.wiredep)))
     .pipe($.sourcemaps.init())
-    .pipe($.stylus({use: [rupture()]})).on('error', conf.errorHandler('Stylus'))
-    .pipe($.postcss([lost()])).on('error', conf.errorHandler('PostCSS'))
-    .pipe($.autoprefixer()).on('error', conf.errorHandler('Autoprefixer'))
+    .pipe($.stylus({
+      use: [
+        rupture()
+        // poststylus([autoprefixer({ browsers: ['last 2 versions'] }), 'lost'])
+      ]
+    })).on('error', conf.errorHandler('Stylus'))
+    .pipe(postcss('lost'))
+    .pipe($.autoprefixer().on('error', conf.errorHandler('Autoprefixer'))
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest(path.join(conf.paths.tmp, '/serve/app/')))
     .pipe(browserSync.reload({ stream: true }));
